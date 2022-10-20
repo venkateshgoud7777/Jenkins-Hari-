@@ -1,0 +1,44 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage ('ContinuousDownload')
+        {
+         steps
+          {
+           git 'https://github.com/Hari2658/Anjupileauto.git'  
+          }
+        }
+        stage ('ContinuousBuild')
+        {
+         steps
+          {
+           sh 'mvn package' 
+          }
+        }
+         stage ('ContinuousDeployment')
+        {
+         steps
+          {
+            deploy adapters: [tomcat9(credentialsId: 'ea7d7341-3354-4c86-9a61-02087cc1d32e', path: '', url: 'http://172.31.19.219:8080')], contextPath: 'sreeapp', war: '**/*.war' 
+          }
+        }
+        stage ('ContinuousTesting')
+        {
+         steps
+          {
+           git 'https://github.com/Hari2658/HariTestingcode.git'
+           sh 'java -jar /home/ubuntu/.jenkins/workspace/Anjupipleline/testing.jar'
+          }
+        }
+        stage ('ContinuousDelivery')
+        {
+         steps
+          {
+           input message: 'need approval from the Anjali', submitter: 'Anjali'
+           deploy adapters: [tomcat9(credentialsId: 'ea7d7341-3354-4c86-9a61-02087cc1d32e', path: '', url: 'http://172.31.22.96:8080')], contextPath: 'kanthapp', war: '**/*.war'
+          }
+        }
+    }
+}
